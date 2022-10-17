@@ -1,10 +1,9 @@
 /*the package draws a helicopter withe a helipa */
-#include<stdlib.h>
 #include <GL/glut.h>
 #include <math.h>
+#include <stdlib.h>
 
-#include<string.h>
-#include "utils/draw_body.cpp"
+#include <string.h>
 void draw_heli();
 void draw_body();
 void draw_rotor();
@@ -15,7 +14,7 @@ void draw_grass();
 void draw_helipad();
 void draw_building();
 void draw_sky();
-void polygon(int a,int b,int c,int d);
+void polygon(int a, int b, int c, int d);
 void fly_effect();
 void my_menu(int id);
 void view_menu(int id);
@@ -24,527 +23,560 @@ void house_color_menu(int id);
 void helicopter_color_menu(int id);
 void help_page();
 void draw_mountain();
-void Sprint( int x, int y,float,float,float, char *st,void *font);
+void Sprint(int x, int y, float, float, float, char *st, void *font);
 
-GLint sub_menu[5];//list of submenus
+GLint sub_menu[5]; // list of submenus
 
-//lighting and shading
-GLfloat global_ambient[]={0.1,0.1,0.1,1.0};;
-GLfloat light0_pos[]={2.0,6.0,3.0,0.0};
-GLfloat ambient0[]={1.0,1.0,1.0,1.0};
-GLfloat diffuse0[]={1.0,1.0,1.0,1.0}; //white
-GLfloat specular0[]={1.0,1.0,1.0,1.0};
-GLfloat material_specular[]={0.8,0.8,0.8,1.0};//gray
+// lighting and shading
+GLfloat global_ambient[] = {0.1, 0.1, 0.1, 1.0};
+;
+GLfloat light0_pos[] = {2.0, 6.0, 3.0, 0.0};
+GLfloat ambient0[] = {1.0, 1.0, 1.0, 1.0};
+GLfloat diffuse0[] = {1.0, 1.0, 1.0, 1.0}; // white
+GLfloat specular0[] = {1.0, 1.0, 1.0, 1.0};
+GLfloat material_specular[] = {0.8, 0.8, 0.8, 1.0}; // gray
 
-GLfloat baseAmbientLight[]={0.2,0.2,0.2,1.0};//grey
+GLfloat baseAmbientLight[] = {0.2, 0.2, 0.2, 1.0}; // grey
 
-GLfloat baseDiffuseLight[3][4]={{0.5411764705,0.168627450980,0.88627456,1.0}, //violet
-                                {1.0,0.0,0.0,1.0}, //red
-                               {1.0,0.82745098039215686274509803921569,0.6078431372549019607843137254902,1.0}};//wood
+GLfloat baseDiffuseLight[3][4] = {
+    {0.5411764705, 0.168627450980, 0.88627456, 1.0}, // violet
+    {1.0, 0.0, 0.0, 1.0},                            // red
+    {1.0, 0.82745098039215686274509803921569, 0.6078431372549019607843137254902,
+     1.0}}; // wood
 
-GLfloat roofAmbientLight[]={0.2,0.2,0.2,1.0};//grey
+GLfloat roofAmbientLight[] = {0.2, 0.2, 0.2, 1.0}; // grey
 
-GLfloat roofDiffuseLight[3][4]={{1.0,0.89411764705882352941176470588235,0.88235294117647058823529411764706,1.0},//rose
-                        {0.6078431372549019607843137254902,1.0,1.0,1.0},//blue
-                        {1.0,0.54901960784313725490196078431373,0.0,1.0}};//orange
+GLfloat roofDiffuseLight[3][4] = {
+    {1.0, 0.89411764705882352941176470588235,
+     0.88235294117647058823529411764706, 1.0},            // rose
+    {0.6078431372549019607843137254902, 1.0, 1.0, 1.0},   // blue
+    {1.0, 0.54901960784313725490196078431373, 0.0, 1.0}}; // orange
 
-GLfloat helicopterAmbientLight[]={0.2,0.2,0.2,1.0};//grey
+GLfloat helicopterAmbientLight[] = {0.2, 0.2, 0.2, 1.0}; // grey
 
-GLfloat helicopterDiffuseLight[3][4]={{0.4964028776978417266187050359,0.84509803921568627450980392,0.0,1.0},//green
-                                {0.74117647058823529411764705353,0.7176470588235294117647058823,0.41960784313725490196078431372,1.0},//khakhi
-                                {0.3882352941176470588235294117,0.7215686274509803921568627450,1.0,1.0}};//blue
+GLfloat helicopterDiffuseLight[3][4] = {
+    {0.4964028776978417266187050359, 0.84509803921568627450980392, 0.0,
+     1.0}, // green
+    {0.74117647058823529411764705353, 0.7176470588235294117647058823,
+     0.41960784313725490196078431372, 1.0}, // khakhi
+    {0.3882352941176470588235294117, 0.7215686274509803921568627450, 1.0,
+     1.0}}; // blue
 
+// movement coordinates
+GLfloat myx = 0.0, myy = 0.0, myz = 0.0, rotation = 0.0, rotor_angle = 0.0,
+        heli_tilt = 0.0;
 
-//movement coordinates
-GLfloat myx=0.0, myy=0.0, myz=0.0, rotation=0.0, rotor_angle=0.0, heli_tilt=0.0;
+// coordinates of cube for sky
+GLfloat vertices[8][3] = {{-500.0, -50.0, -500.0}, {500.0, -50.0, -500.0},
+                          {500.0, 500.0, -500.0},  {-500.0, 500.0, -500.0},
+                          {-500.0, -50.0, 500.0},  {500.0, -50.0, 500.0},
+                          {500.0, 500.0, 500.0},   {-500.0, 500.0, 500.0}};
 
-//coordinates of cube for sky
-GLfloat vertices[8][3]={{-500.0,-50.0,-500.0},{500.0,-50.0,-500.0},{500.0,500.0,-500.0},{-500.0,500.0,-500.0},
-	{-500.0,-50.0,500.0},{500.0,-50.0,500.0},{500.0,500.0,500.0},{-500.0,500.0,500.0}};
+// color of cube for sky
+GLdouble colors[8][4] = {
+    {0.8862745098039216, 1.0, 1.0, 0.5}, {0.8862745098039216, 1.0, 1.0, 0.5},
+    {0.4, 0.8784313725490196, 1.0, 0.5}, {0.4, 0.8784313725490196, 1.0, 0.5},
+    {0.8862745098039216, 1.0, 1.0, 0.5}, {0.8862745098039216, 1.0, 1.0, 0.5},
+    {0.4, 0.8784313725490196, 1.0, 0.5}, {0.4, 0.8784313725490196, 1.0, 0.5}};
 
-//color of cube for sky
-GLdouble colors[8][4]={{0.8862745098039216,1.0,1.0,0.5},{0.8862745098039216,1.0,1.0,0.5},{0.4,0.8784313725490196,1.0,0.5},{0.4,0.8784313725490196,1.0,0.5},
-{0.8862745098039216,1.0,1.0,0.5},{0.8862745098039216,1.0,1.0,0.5},{0.4,0.8784313725490196,1.0,0.5},{0.4,0.8784313725490196,1.0,0.5}};
+// flags
+int start = 0, stop = 0, forward_tilt = 0, left_tilt = 0, right_tilt = 0,
+    help = 0, bc = 0, hc = 0;
 
-//flags
-int start=0,stop=0,forward_tilt=0,left_tilt=0,right_tilt=0,help=0,bc=0,hc=0;
+// viewer
+GLfloat viewer[] = {0.0, 60.0, -5.0};
+// at coordinates
+GLfloat at[] = {0.0, 0.0, 0.0};
 
-//viewer
-GLfloat viewer[]={0.0,60.0,-5.0};
-//at coordinates
-GLfloat at[]={0.0,0.0,0.0};
-
-
-void init (void)
-{
-    glEnable (GL_DEPTH_TEST);
-    glEnable (GL_LIGHTING);
-    glEnable (GL_LIGHT0);
+void init(void) {
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
 }
 
-void light (void)
-{
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,global_ambient);// default ambient light when all sources are turned off
-	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_TRUE);//calculate light at true position of viewer
-   	glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, specular0);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0);
-	glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,material_specular);
-	glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,128.0);
-
-
+void light(void) {
+  glLightModelfv(
+      GL_LIGHT_MODEL_AMBIENT,
+      global_ambient); // default ambient light when all sources are turned off
+  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,
+                GL_TRUE); // calculate light at true position of viewer
+  glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
+  glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, specular0);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, material_specular);
+  glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 128.0);
 }
 
-void display (void)
-{
+void display(void) {
 
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
-	gluLookAt(viewer[0],viewer[1],viewer[2],at[0],at[1],at[2],0.0,1.0,0.0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glLoadIdentity();
+  gluLookAt(viewer[0], viewer[1], viewer[2], at[0], at[1], at[2], 0.0, 1.0,
+            0.0);
 
-	light();
-	if(help)
-	{
-		help_page();
+  light();
+  if (help) {
+    help_page();
 
-	}
-	else
-	{
+  } else {
     draw_grass();
 
-	glTranslatef(myx+2,myy+2,myz+2);
-	 draw_sky(); //the sky cube moves with the viewer
-    glTranslatef(-myx+2,-myy+2,-myz+2);
+    glTranslatef(myx + 2, myy + 2, myz + 2);
+    draw_sky(); // the sky cube moves with the viewer
+    glTranslatef(-myx + 2, -myy + 2, -myz + 2);
 
-	draw_heli();
+    draw_heli();
 
-	draw_helipad();
+    draw_helipad();
 
-	draw_building();
+    draw_building();
+  }
 
-	}
+  glFlush();
 
-	glFlush();
-
-    glutSwapBuffers();
+  glutSwapBuffers();
 }
 
-void draw_grass()
-{
-	glPushMatrix();
-
-    glDisable(GL_LIGHTING);
-	glColor3f(0.13333,0.545098,0.13333);//forest green
-	double i;
-	glBegin(GL_LINES); //draw mesh
-	for(i=-2500.0;i<=2500;i+=0.5)
-	{
-		glVertex3d(-2500,-11,i);
-		glVertex3d(2500,-11,i);
-		glVertex3d(i,-11,-2500);
-		glVertex3d(i,-11,2500);
-	}
-	glEnd();
-	glEnable(GL_LIGHTING);
-
-
-	glPopMatrix();
-
-}
-
-void polygon(int a,int b,int c,int d)
-{
-	glPushMatrix();
-	 glDisable(GL_LIGHTING);
-
-    glBegin(GL_POLYGON);
-	glColor4dv(colors[a]);
-	glVertex3fv(vertices[a]);
-	glColor4dv(colors[b]);
-	glVertex3fv(vertices[b]);
-	glColor4dv(colors[c]);
-	glVertex3fv(vertices[c]);
-	glColor4dv(colors[d]);
-	glVertex3fv(vertices[d]);
-	glEnd();
-    glEnable(GL_LIGHTING);
-
-
-	glPopMatrix();
-}
-void draw_sky()
-{
-  //sky is drawn by creating a cube whose interior is of blue gradient
+void draw_grass() {
   glPushMatrix();
-  polygon(0,3,2,1);
-  polygon(2,3,7,6);
-  polygon(0,4,7,3);
-  polygon(1,2,6,5);
-  polygon(4,5,6,7);
+
+  glDisable(GL_LIGHTING);
+  glColor3f(0.13333, 0.545098, 0.13333); // forest green
+  double i;
+  glBegin(GL_LINES); // draw mesh
+  for (i = -2500.0; i <= 2500; i += 0.5) {
+    glVertex3d(-2500, -11, i);
+    glVertex3d(2500, -11, i);
+    glVertex3d(i, -11, -2500);
+    glVertex3d(i, -11, 2500);
+  }
+  glEnd();
+  glEnable(GL_LIGHTING);
+
   glPopMatrix();
-
 }
 
-void fly_effect()
-{
-	if(forward_tilt)
-		glRotatef(10.0,1.0,0.0,0.0);
+void polygon(int a, int b, int c, int d) {
+  glPushMatrix();
+  glDisable(GL_LIGHTING);
 
-	if(right_tilt)
-		glRotatef(30.0,0.0,0.0,1.0);
+  glBegin(GL_POLYGON);
+  glColor4dv(colors[a]);
+  glVertex3fv(vertices[a]);
+  glColor4dv(colors[b]);
+  glVertex3fv(vertices[b]);
+  glColor4dv(colors[c]);
+  glVertex3fv(vertices[c]);
+  glColor4dv(colors[d]);
+  glVertex3fv(vertices[d]);
+  glEnd();
+  glEnable(GL_LIGHTING);
 
-	if(left_tilt)
-		glRotatef(-30.0,0.0,0.0,1.0);
-
-
+  glPopMatrix();
+}
+void draw_sky() {
+  // sky is drawn by creating a cube whose interior is of blue gradient
+  glPushMatrix();
+  polygon(0, 3, 2, 1);
+  polygon(2, 3, 7, 6);
+  polygon(0, 4, 7, 3);
+  polygon(1, 2, 6, 5);
+  polygon(4, 5, 6, 7);
+  glPopMatrix();
 }
 
+void fly_effect() {
+  if (forward_tilt)
+    glRotatef(10.0, 1.0, 0.0, 0.0);
+
+  if (right_tilt)
+    glRotatef(30.0, 0.0, 0.0, 1.0);
+
+  if (left_tilt)
+    glRotatef(-30.0, 0.0, 0.0, 1.0);
+}
 
 // Asmin
-void draw_heli()
-{
+void draw_heli() {
 
+  glPushMatrix();
 
-    glPushMatrix();
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, helicopterAmbientLight);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, helicopterDiffuseLight[hc]);
 
-	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT,helicopterAmbientLight);
-	glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,helicopterDiffuseLight[hc]);
+  glTranslatef(myx, myy, myz);
+  fly_effect();
+  glRotatef(rotation, 0.0, 1.0, 0.0); // rotation
+  glTranslatef(-myx, -myy, -myz);
+  glTranslatef(myx, myy, myz);
+  glRotatef(heli_tilt, 0.0, 0.0, 1.0); // tilting
 
-	glTranslatef(myx, myy, myz);
-	  fly_effect();
-	  glRotatef(rotation, 0.0, 1.0, 0.0);  //rotation
-	  glTranslatef(-myx, -myy, -myz);
-	  glTranslatef(myx,myy,myz);
-	 glRotatef(heli_tilt, 0.0, 0.0, 1.0);  //tilting
+  draw_body();
 
-    draw_body();
+  draw_rotor();
 
-	draw_rotor();
+  draw_tail();
 
-   	draw_tail();
+  draw_leg();
 
-	draw_leg();
+  draw_tail_fan();
 
-	draw_tail_fan();
-
-	glPopMatrix();
-
+  glPopMatrix();
 }
 
+void draw_helipad() {
+  glPushMatrix();
 
+  glDisable(GL_LIGHTING);
+  glColor3f(0.125, 0.125, 0.125);
 
+  glTranslatef(0.0, -9.0, -1.0);
+  glRotatef(-90.0, 1.0, 0.0, 0.0);
+  glScalef(1.0, 1.0, 0.1);
+  glutSolidTorus(13.0, 13.0, 100, 100);
+  glScalef(1.0, 1.0, 1.0);
 
-void draw_helipad()
-{
-	glPushMatrix();
+  glLineWidth(25.0);
+  glColor3f(1.0, 1.0, 1.0);
 
-	glDisable(GL_LIGHTING);
-	glColor3f(0.125,0.125,0.125);
+  glBegin(GL_QUADS);
+  // write H
+  glVertex3f(-9.5, -1.5, 16);
+  glVertex3f(-9.5, 1.5, 16);
+  glVertex3f(9.5, 1.5, 16);
+  glVertex3f(9.5, -1.5, 16);
 
+  glVertex3f(9.5, 11.5, 16);
+  glVertex3f(9.5, -11.5, 16);
+  glVertex3f(11.5, -11.5, 16);
+  glVertex3f(11.5, 11.5, 16);
 
-	glTranslatef(0.0,-9.0,-1.0);
-	glRotatef(-90.0,1.0,0.0,0.0);
-	glScalef(1.0,1.0,0.1);
-	glutSolidTorus(13.0,13.0,100,100);
-    glScalef(1.0,1.0,1.0);
+  glVertex3f(-9.5, 11.5, 16);
+  glVertex3f(-9.5, -11.5, 16);
+  glVertex3f(-11.5, -11.5, 16);
+  glVertex3f(-11.5, 11.5, 16);
+  glEnd();
 
-	glLineWidth(25.0);
-	glColor3f(1.0,1.0,1.0);
+  glEnable(GL_LIGHTING);
 
-	glBegin(GL_QUADS);
-	//write H
-	glVertex3f(-9.5,-1.5,16);
-	glVertex3f(-9.5,1.5,16);
-	glVertex3f(9.5,1.5,16);
-	glVertex3f(9.5,-1.5,16);
-
-	glVertex3f(9.5,11.5,16);
-	glVertex3f(9.5,-11.5,16);
-	glVertex3f(11.5,-11.5,16);
-	glVertex3f(11.5,11.5,16);
-
-	glVertex3f(-9.5,11.5,16);
-	glVertex3f(-9.5,-11.5,16);
-	glVertex3f(-11.5,-11.5,16);
-	glVertex3f(-11.5,11.5,16);
-	glEnd();
-
-	glEnable(GL_LIGHTING);
-
-
-	glPopMatrix();
-
+  glPopMatrix();
 }
 
-void draw_building()
-{
+void draw_building() {
 
-	glPushMatrix();
-	float x,z;
-	for(z=100;z<=1000;z+=150)
-	for(x=-400;x<=400;x+=150)
-	{
+  glPushMatrix();
+  float x, z;
+  for (z = 100; z <= 1000; z += 150)
+    for (x = -400; x <= 400; x += 150) {
 
-		glPushMatrix();
+      glPushMatrix();
 
-        glTranslatef(x,0.0,z);
-		glTranslatef(-x,0.0,-z);
-		glTranslatef(-x,0.0,z);
-		glTranslatef(x,0.0,-z);
+      glTranslatef(x, 0.0, z);
+      glTranslatef(-x, 0.0, -z);
+      glTranslatef(-x, 0.0, z);
+      glTranslatef(x, 0.0, -z);
 
+      glPopMatrix();
+    }
 
+  glPushMatrix();
+  glTranslatef(0.0, 0.0, 1010.0);
+  draw_helipad();
+  glTranslatef(0.0, 0.0, -1010.0);
+  glPopMatrix();
 
-		glPopMatrix();
-	}
-
-	glPushMatrix();
-	glTranslatef(0.0,0.0,1010.0);
-	draw_helipad();
-	glTranslatef(0.0,0.0,-1010.0);
-	glPopMatrix();
-
-	glPopMatrix();
-
+  glPopMatrix();
 }
-
 
 // This prints a string to the screen
-void Sprint( int x, int y,float r,float g,float b, char *st,void* font)
-{
-int l,i;
+void Sprint(int x, int y, float r, float g, float b, char *st, void *font) {
+  int l, i;
 
-l=strlen( st ); // see how many characters are in text string.
-glRasterPos2i( x, y); // location to start printing text
-glColor3f(r,g,b); //color of text
-for( i=0; i < l; i++) // loop until i is greater then l
-{
-glutBitmapCharacter(font, st[i]); // Print a character on the screen
-}
-}
-
-
-
-
-void reshape (int w, int h) {
-    glViewport (0, 0, (GLsizei)w, (GLsizei)h);
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity ();
-    gluPerspective (100, (GLfloat)w / (GLfloat)h, 0.1, 1500.0);
-
-    glMatrixMode (GL_MODELVIEW);
-	glutPostRedisplay();
+  l = strlen(st);         // see how many characters are in text string.
+  glRasterPos2i(x, y);    // location to start printing text
+  glColor3f(r, g, b);     // color of text
+  for (i = 0; i < l; i++) // loop until i is greater then l
+  {
+    glutBitmapCharacter(font, st[i]); // Print a character on the screen
+  }
 }
 
-void keyboard (unsigned char key, int x, int y)
-{
-	//explicit viewer movements
-    if(key=='b'||key=='B') {help=0;}
+void reshape(int w, int h) {
+  glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(100, (GLfloat)w / (GLfloat)h, 0.1, 1500.0);
 
-    if(key=='x'){viewer[0]+=1.0;}
-	if(key=='X'){viewer[0]-=1.0;}
-	if(key=='y') {viewer[1]+=1.0;}
-	if(key=='Y') {viewer[1]-=1.0;}
-	if(key=='z') {viewer[2]+=1.0;}
-	if(key=='Z') {viewer[2]-=1.0;}
-	if(key=='r') rotation++;
-	if(key=='R') rotation--;
-	if(key=='h') heli_tilt++;
-	if(key=='H') heli_tilt--;
-
+  glMatrixMode(GL_MODELVIEW);
+  glutPostRedisplay();
 }
 
+void keyboard(unsigned char key, int x, int y) {
+  // explicit viewer movements
+  if (key == 'b' || key == 'B') {
+    help = 0;
+  }
 
-void Specialkey(int key,int x,int y)
-{
-
-    if(start)
-	{
-	if(key==GLUT_KEY_UP) {myz++; viewer[2]+=1.0;at[2]+=1.0;forward_tilt=1; }
-	if(key==GLUT_KEY_RIGHT) {myx--; viewer[0]-=1.0;at[0]-=1.0;right_tilt=1;}
-	if(key==GLUT_KEY_LEFT) {myx++; viewer[0]+=1.0;at[0]+=1.0;left_tilt=1;}
-	if(key==GLUT_KEY_DOWN) {if(myy>0.0)myy--;if(viewer[1]>0)viewer[1]-=1.0;at[1]-=1.0;}
-	}
-
+  if (key == 'x') {
+    viewer[0] += 1.0;
+  }
+  if (key == 'X') {
+    viewer[0] -= 1.0;
+  }
+  if (key == 'y') {
+    viewer[1] += 1.0;
+  }
+  if (key == 'Y') {
+    viewer[1] -= 1.0;
+  }
+  if (key == 'z') {
+    viewer[2] += 1.0;
+  }
+  if (key == 'Z') {
+    viewer[2] -= 1.0;
+  }
+  if (key == 'r')
+    rotation++;
+  if (key == 'R')
+    rotation--;
+  if (key == 'h')
+    heli_tilt++;
+  if (key == 'H')
+    heli_tilt--;
 }
-void idle()
-{
-	if(start)
-	{//start up
-	if(rotor_angle<100)
-			rotor_angle+=200.0;
-	 else if(rotor_angle<200)
-			rotor_angle+=20.5;
-	 else if(rotor_angle<300)
-	    	rotor_angle+=300.0;
-	 else if(rotor_angle<400)
-	    	rotor_angle+=300.5;
+
+void Specialkey(int key, int x, int y) {
+
+  if (start) {
+    if (key == GLUT_KEY_UP) {
+      myz++;
+      viewer[2] += 1.0;
+      at[2] += 1.0;
+      forward_tilt = 1;
+    }
+    if (key == GLUT_KEY_RIGHT) {
+      myx--;
+      viewer[0] -= 1.0;
+      at[0] -= 1.0;
+      right_tilt = 1;
+    }
+    if (key == GLUT_KEY_LEFT) {
+      myx++;
+      viewer[0] += 1.0;
+      at[0] += 1.0;
+      left_tilt = 1;
+    }
+    if (key == GLUT_KEY_DOWN) {
+      if (myy > 0.0)
+        myy--;
+      if (viewer[1] > 0)
+        viewer[1] -= 1.0;
+      at[1] -= 1.0;
+    }
+  }
+}
+void idle() {
+  if (start) { // start up
+    if (rotor_angle < 100)
+      rotor_angle += 200.0;
+    else if (rotor_angle < 200)
+      rotor_angle += 20.5;
+    else if (rotor_angle < 300)
+      rotor_angle += 300.0;
+    else if (rotor_angle < 400)
+      rotor_angle += 300.5;
     else
-		 rotor_angle+=500.0;
-	if(rotor_angle>1000 && rotor_angle<100000)
-	{
-		if(myy<100)
-		{
-		 myy+=1.0;
-		 at[1]+=1.0;
-		}
-
-	}
-	}
-	if(stop)
-	{
-		if(myy>0.0)
-		{
-		  myy-=1.0;
-		  at[1]-=1.0;
-		 if(viewer[1]>0)
-		  viewer[1]-=1.0;
-		}
-		else
-		{
-			start=0;
-			stop=0;
-		}
-	}
-		display();
+      rotor_angle += 500.0;
+    if (rotor_angle > 1000 && rotor_angle < 100000) {
+      if (myy < 100) {
+        myy += 1.0;
+        at[1] += 1.0;
+      }
+    }
+  }
+  if (stop) {
+    if (myy > 0.0) {
+      myy -= 1.0;
+      at[1] -= 1.0;
+      if (viewer[1] > 0)
+        viewer[1] -= 1.0;
+    } else {
+      start = 0;
+      stop = 0;
+    }
+  }
+  display();
 }
 
-void Releasekey(int key,int x,int y)
-{
-	if(key==GLUT_KEY_UP) {forward_tilt=0; }
-	if(key==GLUT_KEY_RIGHT) {right_tilt=0;}
-	if(key==GLUT_KEY_LEFT) {left_tilt=0;}
-
+void Releasekey(int key, int x, int y) {
+  if (key == GLUT_KEY_UP) {
+    forward_tilt = 0;
+  }
+  if (key == GLUT_KEY_RIGHT) {
+    right_tilt = 0;
+  }
+  if (key == GLUT_KEY_LEFT) {
+    left_tilt = 0;
+  }
 }
 
-void my_menu(int id)
-{
-	switch(id)
-	{
-	case 1: start=1;stop=0;rotor_angle=0.0; viewer[0]=40.0+myx;viewer[1]=0.0+myy;viewer[2]=0.0+myz;
-		break;
-	case 2:myy+=3.0;at[1]+=3.0;
-		break;
-	case 3:stop=1;
-		break;
-	case 4:help=1;
-		break;
-	case 5:exit(0);
-	}
-	glutPostRedisplay();
-
+void my_menu(int id) {
+  switch (id) {
+  case 1:
+    start = 1;
+    stop = 0;
+    rotor_angle = 0.0;
+    viewer[0] = 40.0 + myx;
+    viewer[1] = 0.0 + myy;
+    viewer[2] = 0.0 + myz;
+    break;
+  case 2:
+    myy += 3.0;
+    at[1] += 3.0;
+    break;
+  case 3:
+    stop = 1;
+    break;
+  case 4:
+    help = 1;
+    break;
+  case 5:
+    exit(0);
+  }
+  glutPostRedisplay();
 }
 
-void view_menu(int id)
-{
-	switch(id)
-	{
-	case 1: viewer[0]=0.0+myx;viewer[1]=1.0;viewer[2]=-2.0+myz;at[0]=myx;at[1]=myy;at[2]=myz;
-		break;
-	case 2: viewer[0]=0.0+myx;viewer[1]=5.0+myy;viewer[2]=15.0+myz;at[0]=viewer[0]+0.0;at[1]=0.0+viewer[1];at[2]=15.0+viewer[2];
-		break;
-	case 3: viewer[0]=0.0+myx;viewer[1]=100.0+myy;viewer[2]=-15.0+myz;at[0]=myx;at[1]=myy;at[2]=myz;
-		break;
-	case 4:viewer[0]=7.0+myx;viewer[1]=0.0+myy;viewer[2]=-35.0+myz;at[0]=myx;at[1]=myy;at[2]=myz;
-		break;
-
-	}
-	glutPostRedisplay();
-
+void view_menu(int id) {
+  switch (id) {
+  case 1:
+    viewer[0] = 0.0 + myx;
+    viewer[1] = 1.0;
+    viewer[2] = -2.0 + myz;
+    at[0] = myx;
+    at[1] = myy;
+    at[2] = myz;
+    break;
+  case 2:
+    viewer[0] = 0.0 + myx;
+    viewer[1] = 5.0 + myy;
+    viewer[2] = 15.0 + myz;
+    at[0] = viewer[0] + 0.0;
+    at[1] = 0.0 + viewer[1];
+    at[2] = 15.0 + viewer[2];
+    break;
+  case 3:
+    viewer[0] = 0.0 + myx;
+    viewer[1] = 100.0 + myy;
+    viewer[2] = -15.0 + myz;
+    at[0] = myx;
+    at[1] = myy;
+    at[2] = myz;
+    break;
+  case 4:
+    viewer[0] = 7.0 + myx;
+    viewer[1] = 0.0 + myy;
+    viewer[2] = -35.0 + myz;
+    at[0] = myx;
+    at[1] = myy;
+    at[2] = myz;
+    break;
+  }
+  glutPostRedisplay();
 }
 
-void rotate_menu(int id)
-{
-	switch(id)
-	{
-	case 1:rotation=90.0;
-		break;
-	case 2:rotation=-90.0;
-		break;
-	case 3:rotation=0.0;
-		break;
-
-	}
-	glutPostRedisplay();
+void rotate_menu(int id) {
+  switch (id) {
+  case 1:
+    rotation = 90.0;
+    break;
+  case 2:
+    rotation = -90.0;
+    break;
+  case 3:
+    rotation = 0.0;
+    break;
+  }
+  glutPostRedisplay();
 }
 
-void house_color_menu(int id)
-{
-	switch(id)
-	{
-	case 1:bc=1;
-		break;
-	case 2:bc=2;
-		break;
-	case 3:bc=0;
-		break;
-
-	}
-	glutPostRedisplay();
+void house_color_menu(int id) {
+  switch (id) {
+  case 1:
+    bc = 1;
+    break;
+  case 2:
+    bc = 2;
+    break;
+  case 3:
+    bc = 0;
+    break;
+  }
+  glutPostRedisplay();
 }
 
-void helicopter_color_menu(int id)
-{
-	switch(id)
-	{
-	case 1:hc=1;
-		break;
-	case 2:hc=2;
-		break;
-	case 3:hc=0;
-		break;
-
-	}
-	glutPostRedisplay();
+void helicopter_color_menu(int id) {
+  switch (id) {
+  case 1:
+    hc = 1;
+    break;
+  case 2:
+    hc = 2;
+    break;
+  case 3:
+    hc = 0;
+    break;
+  }
+  glutPostRedisplay();
 }
 
-int main (int argc, char **argv) {
-    glutInit (&argc, argv);
-    glutInitDisplayMode (GLUT_DOUBLE | GLUT_DEPTH|GLUT_RGBA);
-    glutInitWindowSize (250, 250);
-    glutInitWindowPosition (0,0);
-    glutCreateWindow ("The Helicopter");
-    init ();
-    glutDisplayFunc (display);
+int main(int argc, char **argv) {
+  glutInit(&argc, argv);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGBA);
+  glutInitWindowSize(250, 250);
+  glutInitWindowPosition(0, 0);
+  glutCreateWindow("The Helicopter");
+  init();
+  glutDisplayFunc(display);
 
-    glutIdleFunc (idle);
-    glutKeyboardFunc (keyboard);
-	glutSpecialFunc(Specialkey);
-	glutSpecialUpFunc(Releasekey);
-    glutReshapeFunc (reshape);
+  glutIdleFunc(idle);
+  glutKeyboardFunc(keyboard);
+  glutSpecialFunc(Specialkey);
+  glutSpecialUpFunc(Releasekey);
+  glutReshapeFunc(reshape);
 
-	sub_menu[0] =glutCreateMenu(view_menu);
-	glutAddMenuEntry("Ground View",1);
-    glutAddMenuEntry("Pilot View",2);
-	glutAddMenuEntry("Landscape View",3);
-	glutAddMenuEntry("Follow View",4);
+  sub_menu[0] = glutCreateMenu(view_menu);
+  glutAddMenuEntry("Ground View", 1);
+  glutAddMenuEntry("Pilot View", 2);
+  glutAddMenuEntry("Landscape View", 3);
+  glutAddMenuEntry("Follow View", 4);
 
-	sub_menu[1] =glutCreateMenu(rotate_menu);
-	glutAddMenuEntry("90 degree",1);
-    glutAddMenuEntry("-90 degree",2);
-    glutAddMenuEntry("0 degree",3);
+  sub_menu[1] = glutCreateMenu(rotate_menu);
+  glutAddMenuEntry("90 degree", 1);
+  glutAddMenuEntry("-90 degree", 2);
+  glutAddMenuEntry("0 degree", 3);
 
-	sub_menu[2] =glutCreateMenu(house_color_menu);
-	glutAddMenuEntry("Red and Blue",1);
-    glutAddMenuEntry("Brown and Orange",2);
-	glutAddMenuEntry("default",3);
+  sub_menu[2] = glutCreateMenu(house_color_menu);
+  glutAddMenuEntry("Red and Blue", 1);
+  glutAddMenuEntry("Brown and Orange", 2);
+  glutAddMenuEntry("default", 3);
 
-	sub_menu[3] =glutCreateMenu(helicopter_color_menu);
-	glutAddMenuEntry("khakhi",1);
-    glutAddMenuEntry("blue",2);
-	glutAddMenuEntry("default",3);
+  sub_menu[3] = glutCreateMenu(helicopter_color_menu);
+  glutAddMenuEntry("khakhi", 1);
+  glutAddMenuEntry("blue", 2);
+  glutAddMenuEntry("default", 3);
 
-	glutCreateMenu(my_menu);
-	glutAddMenuEntry("START",1);
-	glutAddSubMenu("Viewing",sub_menu[0]);
-	glutAddSubMenu("Rotate",sub_menu[1]);
-	glutAddMenuEntry("Move Up",2);
-	glutAddSubMenu("Color of House",sub_menu[2]);
-	glutAddSubMenu("Color of Helicopter",sub_menu[3]);
-	glutAddMenuEntry("STOP",3);
-	glutAddMenuEntry("Help",4);
-	glutAddMenuEntry("Exit",5);
-	glutAttachMenu(GLUT_RIGHT_BUTTON);
+  glutCreateMenu(my_menu);
+  glutAddMenuEntry("START", 1);
+  glutAddSubMenu("Viewing", sub_menu[0]);
+  glutAddSubMenu("Rotate", sub_menu[1]);
+  glutAddMenuEntry("Move Up", 2);
+  glutAddSubMenu("Color of House", sub_menu[2]);
+  glutAddSubMenu("Color of Helicopter", sub_menu[3]);
+  glutAddMenuEntry("STOP", 3);
+  glutAddMenuEntry("Help", 4);
+  glutAddMenuEntry("Exit", 5);
+  glutAttachMenu(GLUT_RIGHT_BUTTON);
 
-    glutMainLoop ();
+  glutMainLoop();
 }
