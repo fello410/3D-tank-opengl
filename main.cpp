@@ -499,6 +499,53 @@ void rotate_menu(int id) {
   }
   glutPostRedisplay();
 }
+// saleh badawi
+void draw_leg()
+{
+  glPushMatrix();
+
+  	glDisable(GL_LIGHTING);
+	glColor4f(0.7,0.7,0.7,1.0);//grey
+
+  glBegin(GL_LINES);
+  //first leg
+  glVertex3f(5,-7,7);
+  glVertex3f(5,-7,-7);
+
+  glVertex3f(5,-7,7);
+  glVertex3f(5,-6,8);
+
+  glVertex3f(5,-7,-7);
+  glVertex3f(5,-6,-8);
+
+  glVertex3f(0,0.0,5);
+  glVertex3f(5,-7.0,5);
+
+  glVertex3f(0,0.0,-5);
+  glVertex3f(5,-7.0,-5);
+
+   glVertex3f(-5,-7,7);
+  glVertex3f(-5,-7,-7);
+
+  //second leg
+  glVertex3f(-5,-7,7);
+  glVertex3f(-5,-6,8);
+
+  glVertex3f(-5,-7,-7);
+  glVertex3f(-5,-6,-8);
+
+  glVertex3f(0,0.0,5);
+  glVertex3f(-5,-7.0,5);
+
+  glVertex3f(0,0.0,-5);
+  glVertex3f(-5,-7.0,-5);
+
+  glEnd();
+
+  	glEnable(GL_LIGHTING);
+
+  glPopMatrix();
+}
 
 void house_color_menu(int id) {
   switch (id) {
