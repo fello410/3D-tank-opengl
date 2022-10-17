@@ -1,0 +1,24 @@
+# depslib dependency file v1.0
+1665835289 source:c:\users\asus\documents\semester 3\grafika_komputer\3d-helicopter-opengl\helicopter\main.cpp
+	<stdlib.h>
+	<GL/glut.h>
+	<math.h>
+	<string.h>
+
+1663765397 c:\program files (x86)\codeblocks\mingw\include\gl\glut.h
+	"freeglut_std.h"
+
+1663765397 c:\program files (x86)\codeblocks\mingw\include\gl\freeglut_std.h
+	<windows.h>
+	<EGL/egl.h>
+	<GLES/gl.h>
+	<GLES2/gl2.h>
+	<OpenGL/gl.h>
+	<OpenGL/glu.h>
+	<GL/gl.h>
+	<GL/glu.h>
+	<stdlib.h>
+
+1666010109 source:c:\users\asus\documents\semester 3\grafika_komputer\3d-helicopter-opengl\helicopter\utils\draw_body.cpp
+	<GL/glut.h>
+
