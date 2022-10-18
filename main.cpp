@@ -561,7 +561,44 @@ void house_color_menu(int id) {
   }
   glutPostRedisplay();
 }
+// felonissa
+void help_page()
+{
+	char str1[]="About the Package";
+	char str2[]="The Package presents a helicopter in a scene where the scene comprises of grass,helipad,buildings and sky.";
+	char str3[]="Initially the user sees the top view of Helicopter,when he/she starts the Helicopter it raises to certain altitude.";
+	char str4[]="Now he user can select one of the four views and move the Helicopter.Time being he/she can also change the colors.";
+	char str5[]="HAPPY JOURNEY.......";
+	char str6[]="Designed and Developed by:";
+	char str7[]="Akash Kumar R ";
+	char str8[]="1BI10CS007";
 
+	glPushMatrix();
+	glDisable(GL_LIGHTING);
+	glClearColor(1.0,1.0,1.0,1.0);
+
+	Sprint(2,56,0.3,0.3,0.3,str1,GLUT_BITMAP_TIMES_ROMAN_24);
+
+
+	Sprint(12,55,0.3,0.3,0.3,str2,GLUT_BITMAP_TIMES_ROMAN_24);
+
+
+	Sprint(14,54,0.3,0.3,0.3,str3,GLUT_BITMAP_TIMES_ROMAN_24);
+
+	Sprint(16,53,0.3,0.3,0.3,str4,GLUT_BITMAP_TIMES_ROMAN_24);
+
+	Sprint(5,51,0.3,0.3,0.3,str5,GLUT_BITMAP_TIMES_ROMAN_24);
+
+	Sprint(180,-20,0.3,0.3,0.3,str6,GLUT_BITMAP_TIMES_ROMAN_24);
+
+	Sprint(420,-400,0.3,0.3,0.3,str7,GLUT_BITMAP_TIMES_ROMAN_24);
+
+	Sprint(0,-400,0.3,0.3,0.3,str8,GLUT_BITMAP_TIMES_ROMAN_24);
+
+	glEnable(GL_LIGHTING);
+	glPopMatrix();
+
+}
 void helicopter_color_menu(int id) {
   switch (id) {
   case 1:
